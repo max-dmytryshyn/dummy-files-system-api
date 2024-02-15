@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.routes import item, file, directory
+from api.utils import camelize_query_parameters_with_no_custom_alias
 
 load_dotenv()
 
@@ -24,3 +25,5 @@ app.add_middleware(
 app.include_router(item.router)
 app.include_router(file.router)
 app.include_router(directory.router)
+
+camelize_query_parameters_with_no_custom_alias(app)
