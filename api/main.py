@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from api.routes import item, file, directory
 
 load_dotenv()
 
@@ -18,3 +19,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+app.include_router(item.router)
+app.include_router(file.router)
+app.include_router(directory.router)
