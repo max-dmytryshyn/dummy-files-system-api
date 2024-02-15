@@ -127,7 +127,8 @@ class FilesSystemManager:
         self,
         directory_path: str = '/',
         include_inner: bool = False,
-        sort_fields: Tuple[str] = (),
+        sort_fields: List[str] = (),
+        descending: bool = False,
         calculate_directories_size: bool = False
     ):
         directory = self.get_directory_from_path(directory_path)
@@ -145,4 +146,5 @@ class FilesSystemManager:
         else:
             items = directory.items
 
-        return sorted(items, key=get_items_sort_function(sort_fields, calculate_directories_size))
+        return sorted(items, key=get_items_sort_function(sort_fields, calculate_directories_size), reverse=descending)
+

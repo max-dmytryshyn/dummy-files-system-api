@@ -3,6 +3,7 @@ from typing import List, Tuple
 from files_system.constants import ItemType, SortableItemFields
 from files_system.data_classes import File, Directory
 from files_system.exceptions import NotStartingWithSlashPathException, EmptyPathException, SortByThisFieldNotSupported
+from files_system.validators import validate_sort_field
 
 
 def get_items_names_from_path(path) -> List[str]:
@@ -24,45 +25,34 @@ def is_file(item: File | Directory) -> bool:
     return item.type == ItemType.FILE
 
 
-def get_sorting_tuple_from_sort_field(sort_field: str) -> Tuple[str, bool]:
-    sorting_tuple = (sort_field[1:], True) if sort_field.startswith('-') else (sort_field, False)
-    if sorting_tuple[0] not in SortableItemFields:
-        raise SortByThisFieldNotSupported(sort_field)
-    return sorting_tuple
-
-
-def get_item_field_from_sorting_tuple(
+def get_item_field_from_sort_field(
     item: File | Directory,
-    sorting_tuple: Tuple[str, bool],
+    sort_field: str,
     calculate_directories_size: bool
 ):
-    value = 0
-    if sorting_tuple[0] == 'byte_size':
+    validate_sort_field(sort_field)
+    if sort_field == 'byte_size':
         if is_directory(item) and not calculate_directories_size:
-            value = 0
+            return 0
         else:
-            value = item.byte_size
+            return item.byte_size
 
-    if sorting_tuple[0] == 'name':
-        value = item.name
+    if sort_field == 'name':
+        return item.name
 
-    if sorting_tuple[0] == 'created_at':
-        value = item.created_at
+    if sort_field == 'created_at':
+        return item.created_at
 
-    if sorting_tuple[0] == 'modified_at':
-        value = item.modified_at
+    if sort_field == 'modified_at':
+        return item.modified_at
 
-    if sorting_tuple[1]:
-        return -value
-    return value
+    return 0
 
 
-def get_items_sort_function(sort_fields: Tuple[str], calculate_directories_size: bool):
-    sorting_tuples = [get_sorting_tuple_from_sort_field(sort_field) for sort_field in sort_fields]
-
+def get_items_sort_function(sort_fields: List[str], calculate_directories_size: bool):
     def sort_function(item: File | Directory):
         return [
-            get_item_field_from_sorting_tuple(item, sorting_tuple, calculate_directories_size)
-            for sorting_tuple in sorting_tuples
+            get_item_field_from_sort_field(item, sorting_tuple, calculate_directories_size)
+            for sorting_tuple in sort_fields
         ]
     return sort_function
